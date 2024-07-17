@@ -14,6 +14,6 @@ namespace PostgresAPI.Models
 
         public String category { get; set; }
 
-        public DateOnly date { get; set; }
+        public DateTime date { get; set; }
     }
 }

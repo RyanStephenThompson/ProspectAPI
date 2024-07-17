@@ -15,9 +15,11 @@ namespace PostgresAPI.Models
 
         public String email { get; set; }
 
-        public DateOnly join_date { get; set; }
-        public DateOnly last_active_date { get; set; }
+        public DateTime join_date { get; set; }
+        public DateTime last_active_date { get; set; }
         public bool converted { get; set; }
+
+        public string gender { get; set; }
         
     }
 }

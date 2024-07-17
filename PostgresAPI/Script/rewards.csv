@@ -1,4 +1,4 @@
-"R_ID","RewardName","Category","Cost"
+"reward_id","reward_name","category","cost"
 1,"Kauai Smoothie","Wellness",100
 2,"Free Gym Session","Wellness",300
 3,"Discount On Healthy Foods","Wellness",400

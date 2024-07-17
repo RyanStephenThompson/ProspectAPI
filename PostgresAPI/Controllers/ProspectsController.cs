@@ -76,6 +76,84 @@ namespace PostgresAPI.Controllers
         #region insights
 
         #region points
+        //total number of redemptions 
+        [HttpGet("api/insights/redemptions/total")]
+        public async Task<IActionResult> GetTotalRedemptions()
+        {
+            var totalRedemptions = await _context.redemptions.CountAsync();
+            return Ok(new { TotalRedemptions = totalRedemptions });
+        }
+
+        // most popular reward this month
+        [HttpGet("api/insights/redemptions/most-popular-this-month")]
+        public async Task<IActionResult> GetMostPopularRewardThisMonth()
+        {
+            var now = DateTime.UtcNow;
+            var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
+            var mostPopularRewardThisMonth = await _context.redemptions
+                .Where(r => r.date >= firstDayOfMonth && r.date <= now)
+                .GroupBy(r => r.category)
+                .Select(g => new
+                {
+                    Category = g.Key,
+                    Count = g.Count()
+                })
+                .OrderByDescending(g => g.Count)
+                .FirstOrDefaultAsync();
+
+            var result = new MostPopularRewardThisMonthDto
+            {
+                Category = mostPopularRewardThisMonth.Category,
+                Count = mostPopularRewardThisMonth.Count
+            };
+
+            return Ok(result);
+        }
+
+        // active prospects this month
+        [HttpGet("prospects/active-this-month")]
+        public async Task<IActionResult> GetTotalProspectsActiveThisMonth()
+        {
+            var currentDate = DateTime.Now;
+            var startOfMonth = new DateTime(currentDate.Year, currentDate.Month, 1);
+
+            var totalProspectsActiveThisMonth = await _context.prospects
+                .CountAsync(p => p.last_active_date >= startOfMonth);
+
+            return Ok(new TotalProspectsActiveThisMonthDto { TotalProspects = totalProspectsActiveThisMonth });
+        }
+
+        // total number of prospects with at least one redemption
+        [HttpGet("api/insights/users/with-redemptions")]
+        public async Task<IActionResult> GetTotalUsersWithAtLeastOneRedemption()
+        {
+            var totalUsersWithRedemptions = await _context.redemptions
+                .Select(r => r.ddid)
+                .Distinct()
+                .CountAsync();
+
+            var result = new UsersWithRedemptionsDto
+            {
+                TotalUsers = totalUsersWithRedemptions
+            };
+
+            return Ok(result);
+        }
+
+        // total prospects
+        [HttpGet("api/insights/prospects/total")]
+        public async Task<IActionResult> GetTotalNumberOfProspects()
+        {
+            var totalProspects = await _context.prospects.CountAsync();
+
+            var result = new TotalProspectsDto
+            {
+                TotalProspects = totalProspects
+            };
+
+            return Ok(result);
+        }
+
 
         #endregion
 
@@ -115,41 +193,24 @@ namespace PostgresAPI.Controllers
             return Ok(conversionRate);
         }
 
-        // The most redeemed reward categories
+        // The most redeemed reward categories over time
         // Bar chart
-        [HttpGet("api/insights/redemptions/popular-categories")]
-        public async Task<IActionResult> GetPopularRewardCategories()
+        [HttpGet("api/insights/redemptions/popular-categories-over-time")]
+        public async Task<IActionResult> GetPopularRewardCategoriesOverTime()
         {
-            var popularCategories = await _context.redemptions
-                .GroupBy(r => r.category)
-                .Select(g => new PopularCategoryDto
+            var popularCategoriesOverTime = await _context.redemptions
+                .GroupBy(r => new { r.category, r.date.Year, r.date.Month })
+                .Select(g => new PopularCategoryOverTimeDto
                 {
-                    Category = g.Key,
-                    Count = g.Count()
-                })
-                .OrderByDescending(g => g.Count)
-                .ToListAsync();
-
-            return Ok(popularCategories);
-        }
-
-        // The number of redemptions over time
-        // Line chart
-        [HttpGet("api/insights/redemptions/over-time")]
-        public async Task<IActionResult> GetRedemptionsOverTime()
-        {
-            var redemptionsOverTime = await _context.redemptions
-                .GroupBy(r => new { r.date.Year, r.date.Month })
-                .Select(g => new RedemptionOverTimeDto
-                {
+                    Category = g.Key.category,
                     Year = g.Key.Year,
                     Month = g.Key.Month,
                     Count = g.Count()
                 })
-                .OrderBy(g => g.Year).ThenBy(g => g.Month)
+                .OrderBy(g => g.Year).ThenBy(g => g.Month).ThenByDescending(g => g.Count)
                 .ToListAsync();
 
-            return Ok(redemptionsOverTime);
+            return Ok(popularCategoriesOverTime);
         }
 
         // The distribution of last active dates among prospects
@@ -170,23 +231,29 @@ namespace PostgresAPI.Controllers
             return Ok(lastActiveDateCounts);
         }
 
-        // The number of redemptions per prospect
-        // Bar chart
-        [HttpGet("api/insights/redemptions/by-prospect")]
-        public async Task<IActionResult> GetRedemptionsByProspect()
+
+        //total redemptions over time
+        // line graph
+        [HttpGet("redemptions/total-over-time")]
+        public async Task<IActionResult> GetTotalRedemptionsOverTime()
         {
-            var redemptionsByProspect = await _context.redemptions
-                .GroupBy(r => r.ddid)
-                .Select(g => new RedemptionsByProspectDto
+            var totalRedemptionsOverTime = await _context.redemptions
+                .GroupBy(r => new { r.date.Year, r.date.Month })
+                .Select(g => new TotalRedemptionsOverTimeDto
                 {
-                    DDID = g.Key,
-                    Count = g.Count()
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    TotalRedemptions = g.Count()
                 })
-                .OrderByDescending(g => g.Count)
+                .OrderBy(g => g.Year).ThenBy(g => g.Month)
                 .ToListAsync();
 
-            return Ok(redemptionsByProspect);
+            return Ok(totalRedemptionsOverTime);
         }
+
+
+
+
         #endregion
 
         #endregion

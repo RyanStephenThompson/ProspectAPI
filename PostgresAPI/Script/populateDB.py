@@ -21,7 +21,7 @@ def generate_south_african_id():
     return f"{yy}{mm}{dd}{ssss}{c}{a}{z}"
 
 # Number of dummy records you want to create
-num_records = 20
+num_records = 100
 
 # List to hold generated dummy data
 dummy_data = []
@@ -32,7 +32,8 @@ for _ in range(num_records):
         "first_name": fake.first_name(),
         "surname": fake.last_name(),
         "email": fake.email(),
-        "join_date": fake.date_between(start_date='-2y', end_date='today').strftime('%Y-%m-%d'),
+        "gender": fake.random_element(["male", "female"]),
+        "join_date": fake.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d'),
         "last_active_date": fake.date_between(start_date='-1y', end_date='today').strftime('%Y-%m-%d'),
         "converted": random.choice([False])
     }
@@ -53,8 +54,8 @@ cur = conn.cursor()
 
 # Insert dummy data into the existing table "prospects"
 insert_query = '''
-INSERT INTO public.prospects ("id", "first_name", "surname", "email", "join_date", "last_active_date", "converted")
-VALUES (%s, %s, %s, %s, %s, %s, %s)
+INSERT INTO public.prospects ("id", "first_name", "surname", "email", "join_date", "last_active_date", "converted","gender")
+VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
 '''
 
 for record in dummy_data:
@@ -65,7 +66,8 @@ for record in dummy_data:
         record['email'],
         record['join_date'],
         record['last_active_date'],
-        record['converted']
+        record['converted'],
+        record['gender']
     ))
 
 # Commit the transaction

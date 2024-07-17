@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using PostgresAPI;
 using PostgresAPI.Data;
@@ -43,7 +44,10 @@ builder.Services
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 */
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var app = builder.Build();
+
 //app.UseAuthentication();
 //app.UseAuthorization();
 
@@ -53,6 +57,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
 
 app.UseHttpsRedirection();
 

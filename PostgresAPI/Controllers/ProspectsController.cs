@@ -291,7 +291,7 @@ namespace PostgresAPI.Controllers
         {
             _context.redemptions.Add(redemption);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetRedemptions), new { id = redemption.r_id, ddid = redemption.ddid }, redemption);
+            return CreatedAtAction(nameof(GetRedemptions), new { id = redemption.reward_id, ddid = redemption.ddid }, redemption);
         }
 
         #endregion

@@ -5,7 +5,7 @@ namespace PostgresAPI.Models
     public class Reward
     {
         [Key]
-        public int r_id { get; set; }
+        public int reward_id { get; set; }
 
         public String reward_name {  get; set; }
 

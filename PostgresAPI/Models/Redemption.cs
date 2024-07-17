@@ -8,7 +8,7 @@ namespace PostgresAPI.Models
         [Key]
         public int redemption_id { get; set; }
 
-        public int r_id { get; set; }
+        public int reward_id { get; set; }
 
         public int ddid { get; set; }
 

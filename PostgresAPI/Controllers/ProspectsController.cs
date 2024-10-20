@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Google.Apis.Bigquery.v2;
+using Google.Cloud.BigQuery.V2;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PostgresAPI.Data;
 using PostgresAPI.Models;
@@ -12,16 +8,18 @@ using PostgresAPI.Models.DTOs;
 
 namespace PostgresAPI.Controllers
 {
-    
+
     [Route("api/[controller]")]
     [ApiController]
     public class ProspectsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly BigQueryService _bigQueryService;
 
-        public ProspectsController(AppDbContext context)
+        public ProspectsController(AppDbContext context, BigQueryService bigQueryService)
         {
             _context = context;
+            _bigQueryService = bigQueryService;
         }
 
         private bool ProspectExists(int DDID)
@@ -29,6 +27,126 @@ namespace PostgresAPI.Controllers
             return _context.prospects.Any(e => e.ddid == DDID);
         }
 
+        #region BigQuery Endpoints
+
+        /// <summary>
+        ///  Get all Prospects
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("bigquery")]
+        public async Task<IActionResult> GetBigQueryData()
+        {
+            var data = await _context.GetBigQueryDataAsync();
+            return Ok(data);
+        }
+
+        #region Joined
+        /// <summary>
+        ///  Get Total Prospects 
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("TotalProspects")]
+        public async Task<IActionResult> GetTotalProspects()
+        {
+            var data = await _context.GetTotalProspectsAsync();
+            return Ok(data);
+        }
+
+        /// <summary>
+        ///  Get Prospects Who Joined this Month
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("ProspectsJoined30Days")]
+        public async Task<IActionResult> GetTotalProspectsThisMonth()
+        {
+            var data = await _context.GetTotalProspectsThisMonthAsync();
+            return Ok(data);
+        }
+
+        /// <summary>
+        ///  Get Prospects Who Joined this week
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("ProspectsJoined7Days")]
+        public async Task<IActionResult> GetTotalProspectsThisWeek()
+        {
+            var data = await _context.GetTotalProspectsThisWeekAsync();
+            return Ok(data);
+        }
+
+        /// <summary>
+        ///  Get Prospects Who Joined today
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("ProspectsJoined1Days")]
+        public async Task<IActionResult> GetTotalProspectsToday()
+        {
+            var data = await _context.GetTotalProspectsTodayAsync();
+            return Ok(data);
+        }
+        #endregion
+
+        #region Converted
+
+        /// <summary>
+        ///  Get Total Converted 
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("TotalConverted")]
+        public async Task<IActionResult> GetTotalEntities()
+        {
+            var data = await _context.GetTotalEntitiesAsync();
+            return Ok(data);
+        }
+
+        /// <summary>
+        ///  Get Total Converted 
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("TotalConverted30Days")]
+        public async Task<IActionResult> GetTotalEntitiesThisMonth()
+        {
+            var data = await _context.GetTotalEntitiesThisMonthAsync();
+            return Ok(data);
+        }
+
+        /// <summary>
+        ///  Get Total Converted 
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("TotalConverted7Days")]
+        public async Task<IActionResult> GetTotalEntitiesThisWeek()
+        {
+            var data = await _context.GetTotalEntitiesThisWeekAsync();
+            return Ok(data);
+        }
+
+        /// <summary>
+        ///  Get Total Converted 
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("TotalConverted1Days")]
+        public async Task<IActionResult> GetTotalEntitiesToday()
+        {
+            var data = await _context.GetTotalEntitiesTodayAsync();
+            return Ok(data);
+        }
+
+        #endregion
+
+        #endregion
+
+        #region old endpoints
+        /*
         #region Get
 
         #region get all + search
@@ -332,7 +450,11 @@ namespace PostgresAPI.Controllers
         }
 
         #endregion
+        */
 
+        #endregion
     }
 
 }
+
+        

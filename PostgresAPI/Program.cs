@@ -1,22 +1,34 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
-using PostgresAPI;
 using PostgresAPI.Data;
-using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+// Register BigQueryService with the correct location
+builder.Services.AddSingleton<BigQueryService>(provider =>
+    new BigQueryService(
+        "prospectmanagement-435417",
+        "prospectmanagement-435417-2718fe1b64b1.json"));
+
+// Register DbContext
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))); // Or your actual database provider
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
 
 /* AUTHENTICATION
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -43,22 +55,3 @@ builder.Services
 
 builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 */
-
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
-var app = builder.Build();
-
-//app.UseAuthentication();
-//app.UseAuthorization();
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();

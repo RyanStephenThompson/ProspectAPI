@@ -15,13 +15,9 @@ namespace PostgresAPI.Data
 
         #region Methods to read from BigQuery
 
-        public async Task<IEnumerable<BigQueryRow>> GetBigQueryDataAsync()
-        {
-            string query = "SELECT * FROM `Prospect.prospects` LIMIT 10";
-            return await _bigQueryService.QueryDataAsync(query);
-        }
-
         #region Joined
+
+        #region single data points
         public async Task<int> GetTotalProspectsAsync()
         {
             string query = "SELECT COUNT(*) AS total_prospects FROM `Prospect.prospects`";
@@ -58,6 +54,46 @@ namespace PostgresAPI.Data
             var result = await _bigQueryService.QueryDataAsync(query);
             return Convert.ToInt32(result.First()["total_prospects_today"]);
         }
+        #endregion
+
+        #region Graphs
+
+        public async Task<Dictionary<string, int>> GetJoinedProspectsPerMonthThisYearAsync()
+        {
+            string query = @"
+        SELECT FORMAT_TIMESTAMP('%Y-%m', join_date) AS month_year,
+               COUNT(*) AS prospect_count
+        FROM `Prospect.prospects`
+        WHERE EXTRACT(YEAR FROM join_date) = EXTRACT(YEAR FROM CURRENT_DATE())
+        GROUP BY month_year
+        ORDER BY month_year";
+
+            var result = await _bigQueryService.QueryDataAsync(query);
+
+            var monthlyProspects = new Dictionary<string, int>();
+
+            foreach (var row in result)
+            {
+                monthlyProspects[row["month_year"].ToString()] = Convert.ToInt32(row["prospect_count"]);
+            }
+
+            // Fill in months that have not happened yet with 0
+            var currentYear = DateTime.Now.Year;
+            for (int month = 1; month <= DateTime.Now.Month; month++)
+            {
+                string monthKey = $"{currentYear}-{month:D2}"; // Format: YYYY-MM
+                if (!monthlyProspects.ContainsKey(monthKey))
+                {
+                    monthlyProspects[monthKey] = 0; // No prospects joined in that month
+                }
+            }
+
+            return monthlyProspects;
+        }
+
+
+        #endregion
+
         #endregion
 
         #region Converted
@@ -101,6 +137,7 @@ namespace PostgresAPI.Data
 
         #endregion
 
+  
 
         /*
          *         public async Task<long> GetRecentProspectsCountAsync()

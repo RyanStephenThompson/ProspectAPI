@@ -29,18 +29,6 @@ namespace PostgresAPI.Controllers
 
         #region BigQuery Endpoints
 
-        /// <summary>
-        ///  Get all Prospects
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        [HttpGet("bigquery")]
-        public async Task<IActionResult> GetBigQueryData()
-        {
-            var data = await _context.GetBigQueryDataAsync();
-            return Ok(data);
-        }
-
         #region Joined
         /// <summary>
         ///  Get Total Prospects 
@@ -87,6 +75,18 @@ namespace PostgresAPI.Controllers
         public async Task<IActionResult> GetTotalProspectsToday()
         {
             var data = await _context.GetTotalProspectsTodayAsync();
+            return Ok(data);
+        }
+
+        /// <summary>
+        ///  Get Join Trend
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("ProspectsJoinTrendThisYear")]
+        public async Task<IActionResult> GetJoinedProspectsPerMonthThisYear()
+        {
+            var data = await _context.GetJoinedProspectsPerMonthThisYearAsync();
             return Ok(data);
         }
         #endregion

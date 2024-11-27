@@ -371,3 +371,4 @@ PostrgressAPI/appsettings.json
 
 # Ignore the Script folder
 Script/
+/PostgresAPI/prospectmanagement-435417-2718fe1b64b1.json

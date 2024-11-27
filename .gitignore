@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore the appsettings.json file
+PostrgressAPI/appsettings.json
+
+# Ignore the Script folder
+Script/

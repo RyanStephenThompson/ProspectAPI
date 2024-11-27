@@ -364,3 +364,10 @@ FodyWeavers.xsd
 
 # db key
 PostgresAPI/prospectmanagement-435417-2718fe1b64b1.json
+FodyWeavers.xsd
+
+# Ignore the appsettings.json file
+PostrgressAPI/appsettings.json
+
+# Ignore the Script folder
+Script/
